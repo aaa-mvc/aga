@@ -31,6 +31,7 @@ SUPPORTED_LANGUAGES = {
 
 # ── Pydantic IR Models ─────────────────────────────────────────
 
+
 class SkillMeta(BaseModel):
     """Metadata extracted from SKILL.md frontmatter."""
 
@@ -61,9 +62,7 @@ class SkillIR(BaseModel):
 
     meta: SkillMeta
     instructions_raw: str = Field(default="", max_length=MAX_FILE_SIZE)
-    code_artifacts: list[CodeArtifact] = Field(
-        default_factory=list, max_length=MAX_CODE_ARTIFACTS
-    )
+    code_artifacts: list[CodeArtifact] = Field(default_factory=list, max_length=MAX_CODE_ARTIFACTS)
     dependencies: dict[str, list[str]] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -74,6 +73,7 @@ class SkillIR(BaseModel):
 
 
 # ── Parser ─────────────────────────────────────────────────────
+
 
 class Parser:
     """Parse a skill directory into a SkillIR.
@@ -107,7 +107,7 @@ class Parser:
         frontmatter, body = self._split_frontmatter(skill_md_content)
         meta = self._parse_frontmatter(frontmatter)
 
-        code_artifacts = []
+        code_artifacts: list[CodeArtifact] = []
         for path, content in (scripts or {}).items():
             if len(code_artifacts) >= self.max_code_artifacts:
                 break
@@ -159,9 +159,7 @@ class Parser:
 
         raw_content = skill_md.read_text(encoding="utf-8-sig", errors="replace")
         if len(raw_content) > self.max_file_size:
-            raise ValueError(
-                f"SKILL.md exceeds max size ({self.max_file_size} bytes)"
-            )
+            raise ValueError(f"SKILL.md exceeds max size ({self.max_file_size} bytes)")
 
         frontmatter, body = self._split_frontmatter(raw_content)
         meta = self._parse_frontmatter(frontmatter)
@@ -210,22 +208,33 @@ class Parser:
                 continue
             # Map common language tags to our supported languages
             lang_map = {
-                "python": "python", "py": "python",
-                "bash": "bash", "sh": "bash", "shell": "bash",
-                "javascript": "javascript", "js": "javascript",
-                "typescript": "typescript", "ts": "typescript",
-                "powershell": "powershell", "ps1": "powershell",
-                "ruby": "ruby", "rb": "ruby",
-                "go": "go", "golang": "go",
-                "rust": "rust", "rs": "rust",
+                "python": "python",
+                "py": "python",
+                "bash": "bash",
+                "sh": "bash",
+                "shell": "bash",
+                "javascript": "javascript",
+                "js": "javascript",
+                "typescript": "typescript",
+                "ts": "typescript",
+                "powershell": "powershell",
+                "ps1": "powershell",
+                "ruby": "ruby",
+                "rb": "ruby",
+                "go": "go",
+                "golang": "go",
+                "rust": "rust",
+                "rs": "rust",
             }
             resolved_lang = lang_map.get(lang, lang if lang else "unknown")
-            artifacts.append(CodeArtifact(
-                path=f"SKILL.md:block{i+1}",
-                language=resolved_lang,
-                content=code,
-                size_bytes=len(code.encode("utf-8")),
-            ))
+            artifacts.append(
+                CodeArtifact(
+                    path=f"SKILL.md:block{i + 1}",
+                    language=resolved_lang,
+                    content=code,
+                    size_bytes=len(code.encode("utf-8")),
+                )
+            )
         return artifacts
 
     # ── Private helpers ─────────────────────────────────────────
@@ -236,7 +245,7 @@ class Parser:
         pattern = r"^---\s*\n(.*?)\n---\s*\n"
         match = re.match(pattern, content, re.DOTALL)
         if match:
-            return match.group(1), content[match.end():]
+            return match.group(1), content[match.end() :]
         return "", content
 
     @staticmethod
@@ -246,6 +255,7 @@ class Parser:
             return SkillMeta(name="unknown")
 
         import yaml
+
         try:
             data = yaml.safe_load(raw)
         except yaml.YAMLError:
@@ -318,12 +328,15 @@ class Parser:
         req_file = root / "requirements.txt"
         if req_file.exists():
             lines = req_file.read_text(errors="replace").strip().split("\n")
-            deps["python"] = [line.strip() for line in lines if line.strip() and not line.startswith("#")]
+            deps["python"] = [
+                line.strip() for line in lines if line.strip() and not line.startswith("#")
+            ]
 
         # Node.js
         pkg_file = root / "package.json"
         if pkg_file.exists():
             import json
+
             try:
                 pkg = json.loads(pkg_file.read_text())
                 all_deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}

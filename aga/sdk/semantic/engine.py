@@ -87,8 +87,7 @@ class SemanticEngine:
 
         # ── Fill prompt template ──
         user_prompt = (
-            self._prompt_template
-            .replace("{instructions}", ir.instructions_raw[:4000])
+            self._prompt_template.replace("{instructions}", ir.instructions_raw[:4000])
             .replace("{declared_intent}", ir.meta.declared_intent or "(not stated)")
             .replace("{declared_permissions}", ", ".join(ir.meta.declared_permissions) or "(none)")
             .replace("{allowed_tools}", ", ".join(ir.meta.allowed_tools) or "(none)")
@@ -123,7 +122,7 @@ class SemanticEngine:
                 f"severity={result.get('overall_severity')}, "
                 f"tokens={response.tokens_used}, cost=${response.cost_usd:.6f}"
             )
-            return result
+            return result  # type: ignore[no-any-return]
         except json.JSONDecodeError as exc:
             logger.warning(f"Failed to parse LLM JSON response: {exc}")
             logger.debug(f"Raw response: {response.text[:500]}")

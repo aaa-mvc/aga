@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 
 # ── Enums ──────────────────────────────────────────────────────
 
+
 class RiskLevel(str, Enum):
     LOW = "low"
     MEDIUM = "medium"
@@ -30,6 +31,7 @@ class AttackType(str, Enum):
 
 # ── Issue Model ────────────────────────────────────────────────
 
+
 class Issue(BaseModel):
     """A single detected security issue."""
 
@@ -41,6 +43,7 @@ class Issue(BaseModel):
 
 
 # ── RiskReport Model ───────────────────────────────────────────
+
 
 class RiskReport(BaseModel):
     """Complete security analysis result for a single skill."""
@@ -61,6 +64,7 @@ class RiskReport(BaseModel):
 
 
 # ── Terminal Reporter (Rich) ───────────────────────────────────
+
 
 class Reporter:
     """Format and output RiskReport in various formats."""
@@ -84,9 +88,7 @@ class Reporter:
             }.get(report.risk_level, "white")
 
             title = Text(f"🔍 AGA Scan Report: {report.skill_name}")
-            console.print(
-                Panel(title, border_style=risk_color, title_align="left")
-            )
+            console.print(Panel(title, border_style=risk_color, title_align="left"))
 
             # ── Summary table ──
             summary = Table(show_header=False, box=None)
@@ -193,6 +195,7 @@ class Reporter:
 
 
 # ── Threshold function ─────────────────────────────────────────
+
 
 def threshold(score: int) -> RiskLevel:
     """Convert a numeric risk score to a RiskLevel."""

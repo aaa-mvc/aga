@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 # ── Rule Data Model ────────────────────────────────────────────
 
+
 @dataclass
 class RuleHit:
     """A single rule match against a skill."""
@@ -55,6 +56,7 @@ class Rule:
 
 # ── Rule Set ───────────────────────────────────────────────────
 
+
 class RuleSet:
     """Collection of loaded rules with indexing by behavior and severity."""
 
@@ -85,6 +87,7 @@ class RuleSet:
 
 
 # ── Rule Loader ────────────────────────────────────────────────
+
 
 class RuleLoader:
     """Load rules from YAML files with directory-name-based behavior inference."""
@@ -147,6 +150,7 @@ class RuleLoader:
 
 
 # ── Rule Engine ────────────────────────────────────────────────
+
 
 class RuleEngine:
     """Match loaded rules against a SkillIR and produce RuleHit list."""

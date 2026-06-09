@@ -57,9 +57,7 @@ class AnthropicProvider(LLMProvider):
         # Claude Sonnet pricing (USD per 1M tokens)
         cost = (usage.input_tokens * 3.0 + usage.output_tokens * 15.0) / 1_000_000 if usage else 0.0
 
-        logger.info(
-            f"[anthropic] {model_name}: {tokens} tokens, ${cost:.6f}"
-        )
+        logger.info(f"[anthropic] {model_name}: {tokens} tokens, ${cost:.6f}")
 
         return LLMResponse(
             text=response.content[0].text if response.content else "",

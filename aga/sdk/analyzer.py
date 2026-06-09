@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import time
 from pathlib import Path
+from typing import Any
 
 from aga.sdk.fusion import RiskFusion
 from aga.sdk.parser import Parser
@@ -58,7 +59,7 @@ class Analyzer:
         self._semantic_provider = semantic_provider
         self._semantic_model = semantic_model
         self._semantic_api_key = semantic_api_key
-        self._semantic_engine = None
+        self._semantic_engine: Any = None
 
         if rules:
             self.rule_engine = RuleEngine(rules)
@@ -172,7 +173,7 @@ class Analyzer:
                 return None
 
         try:
-            return self._semantic_engine.analyze(ir, rule_hits)
+            return self._semantic_engine.analyze(ir, rule_hits)  # type: ignore[no-any-return]
         except Exception as exc:
             logger.error(f"Semantic analysis failed: {exc}")
             return None

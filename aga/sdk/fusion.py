@@ -97,9 +97,7 @@ class RiskFusion:
         )
 
     @staticmethod
-    def _infer_attack_type(
-        rule_hits: list[RuleHit], semantic_result: dict | None
-    ) -> AttackType:
+    def _infer_attack_type(rule_hits: list[RuleHit], semantic_result: dict | None) -> AttackType:
         """Determine the dominant attack vector."""
         if semantic_result:
             vector = semantic_result.get("attack_vector", "").upper()
@@ -122,9 +120,7 @@ class RiskFusion:
         return AttackType.NONE
 
     @staticmethod
-    def _generate_suggestions(
-        rule_hits: list[RuleHit], alignment_score: float | None
-    ) -> list[str]:
+    def _generate_suggestions(rule_hits: list[RuleHit], alignment_score: float | None) -> list[str]:
         """Generate actionable remediation suggestions."""
         suggestions: list[str] = []
 
@@ -134,21 +130,33 @@ class RiskFusion:
         if "code_injection" in categories:
             suggestions.append("Review and restrict shell execution and network access in scripts/")
         if "prompt_injection" in categories:
-            suggestions.append("Review SKILL.md for instruction override or role hijacking patterns")
+            suggestions.append(
+                "Review SKILL.md for instruction override or role hijacking patterns"
+            )
         if alignment_score is not None and alignment_score < 0.5:
-            suggestions.append("SKILL.md description does not match code behavior — review intent alignment")
+            suggestions.append(
+                "SKILL.md description does not match code behavior — review intent alignment"
+            )
 
         # Behavior-specific suggestions
         if "B2" in behaviors:
-            suggestions.append("Do not read sensitive environment variables without explicit permission declaration")
+            suggestions.append(
+                "Do not read sensitive environment variables without explicit permission declaration"
+            )
         if "B3" in behaviors or "B4" in behaviors:
-            suggestions.append("Never download and execute remote code — pin all dependencies with hash verification")
+            suggestions.append(
+                "Never download and execute remote code — pin all dependencies with hash verification"
+            )
         if "B5" in behaviors:
             suggestions.append("Remove persistence mechanisms (crontab, bashrc, systemd writes)")
         if "B10" in behaviors:
-            suggestions.append("Remove persona injection instructions — agent identity must not be overridden")
+            suggestions.append(
+                "Remove persona injection instructions — agent identity must not be overridden"
+            )
         if "B12" in behaviors:
-            suggestions.append("Remove 'ignore previous instructions' payload — this is a classic prompt injection")
+            suggestions.append(
+                "Remove 'ignore previous instructions' payload — this is a classic prompt injection"
+            )
 
         if not suggestions:
             suggestions.append("No specific remediation needed — continue monitoring")

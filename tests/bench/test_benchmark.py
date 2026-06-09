@@ -69,6 +69,7 @@ def _is_malicious_ground_truth(dirname: str, is_benign: bool) -> bool:
 def _extract_ground_truth_behavior(dirname: str) -> list[str]:
     """Extract expected behavior IDs from directory name."""
     import re
+
     behaviors = set()
     for match in re.finditer(r"__(CI|PI|MIXED)_B(\d+)", dirname):
         behaviors.add(f"B{match.group(2)}")
@@ -103,10 +104,10 @@ def test_benchmark_50_skills():
     skills = _collect_skills()
     result = BenchmarkResult(total=len(skills))
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  AGA BENCHMARK -- {len(skills)} Skills")
     print(f"  Threshold: score >= {THRESHOLD} -> MALICIOUS")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     for path, is_malicious_gt, dirname in skills:
         report = analyzer.scan(path)
@@ -142,9 +143,9 @@ def test_benchmark_50_skills():
         print(f"  {status} {dirname[:50]:<50} GT={gt_tag:<15} Score={report.risk_score:>3}")
 
     # -- Summary --
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("  BENCHMARK RESULTS")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  Total:        {result.total}")
     print(f"  True Positive:  {result.true_positives}")
     print(f"  True Negative:  {result.true_negatives}")
@@ -155,7 +156,7 @@ def test_benchmark_50_skills():
     print(f"  Recall:       {result.recall:.1%}")
     print(f"  F1 Score:     {result.f1:.1%}")
     print(f"  Accuracy:     {result.accuracy:.1%}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     # -- Detailed breakdown for failures --
     failures = [d for d in result.details if "!!" in d["status"] or "??" in d["status"]]
@@ -168,15 +169,9 @@ def test_benchmark_50_skills():
         print()
 
     # -- Assertions (quality anchors) --
-    assert result.precision >= 0.70, (
-        f"Precision {result.precision:.1%} below 70% threshold"
-    )
-    assert result.recall >= 0.50, (
-        f"Recall {result.recall:.1%} below 50% threshold"
-    )
-    assert result.f1 >= 0.55, (
-        f"F1 {result.f1:.1%} below 55% threshold"
-    )
+    assert result.precision >= 0.70, f"Precision {result.precision:.1%} below 70% threshold"
+    assert result.recall >= 0.50, f"Recall {result.recall:.1%} below 50% threshold"
+    assert result.f1 >= 0.55, f"F1 {result.f1:.1%} below 55% threshold"
 
 
 def test_behavior_coverage():
@@ -198,9 +193,9 @@ def test_behavior_coverage():
             if b in detected:
                 behavior_hits[b] = behavior_hits.get(b, 0) + 1
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("  BEHAVIOR-LEVEL RECALL")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     for b in sorted(set(behavior_total.keys()), key=lambda x: int(x[1:])):
         total = behavior_total.get(b, 0)
         hits = behavior_hits.get(b, 0)
@@ -211,10 +206,11 @@ def test_behavior_coverage():
 
     # Assert at least 50% of behaviors with samples are detected
     total_behaviors = len(behavior_total)
-    detected_behaviors = sum(1 for b, total in behavior_total.items()
-                             if behavior_hits.get(b, 0) > 0)
+    detected_behaviors = sum(
+        1 for b, total in behavior_total.items() if behavior_hits.get(b, 0) > 0
+    )
     coverage = detected_behaviors / total_behaviors if total_behaviors > 0 else 0
     print(f"  Behavior coverage: {detected_behaviors}/{total_behaviors} = {coverage:.1%}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     assert coverage >= 0.60, f"Behavior coverage {coverage:.1%} below 60%"

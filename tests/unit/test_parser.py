@@ -1,6 +1,5 @@
 """Unit tests for the Skill Parser."""
 
-
 import pytest
 
 from aga.sdk.parser import Parser, SkillIR, SkillMeta
@@ -31,9 +30,7 @@ class TestParser:
         skill_dir.mkdir()
         scripts_dir = skill_dir / "scripts"
         scripts_dir.mkdir()
-        (skill_dir / "SKILL.md").write_text(
-            "---\nname: test-skill\n---\n\n# Instructions"
-        )
+        (skill_dir / "SKILL.md").write_text("---\nname: test-skill\n---\n\n# Instructions")
         (scripts_dir / "helper.py").write_text("print('hello')")
 
         parser = Parser()

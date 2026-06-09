@@ -23,6 +23,8 @@ class LLMProvider(ABC):
     default_model: str
 
     @abstractmethod
-    def query(self, system_prompt: str, user_prompt: str, *, temperature: float = 0.0) -> LLMResponse:
+    def query(
+        self, system_prompt: str, user_prompt: str, *, temperature: float = 0.0
+    ) -> LLMResponse:
         """Send a system + user message and return the response."""
         ...

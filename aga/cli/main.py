@@ -20,8 +20,8 @@ import typer
 # Fix Windows console encoding for emoji support
 if sys.platform == "win32":
     try:
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
     except Exception:
         pass
 
@@ -50,9 +50,7 @@ app.add_typer(data_app, name="data")
 # ── Top-level commands ─────────────────────────────────────────
 @app.callback(invoke_without_command=True)
 def main(
-    version: bool = typer.Option(
-        False, "--version", "-V", help="Show version and exit"
-    ),
+    version: bool = typer.Option(False, "--version", "-V", help="Show version and exit"),
 ) -> None:
     """AGA — Secure your Skills. Guard your Agents."""
     if version:
@@ -61,8 +59,9 @@ def main(
 
     # If no subcommand is given and no flags, show help
     import sys as _sys
+
     if len(_sys.argv) == 1:
-        typer.echo(app.get_help())
+        typer.echo("Usage: aga [OPTIONS] COMMAND [ARGS]...\n\n  Try 'aga --help' for help.")
         raise typer.Exit()
 
 

@@ -1,6 +1,5 @@
 """Unit tests for the Rule Engine."""
 
-
 from aga.sdk.parser import SkillIR, SkillMeta
 from aga.sdk.rules.engine import Rule, RuleEngine, RuleLoader, RuleSet
 
@@ -49,9 +48,7 @@ class TestRuleEngine:
             behavior_id="B2",
             description="Test rule",
             match={
-                "code_patterns": [
-                    r"os\.getenv\s*\(\s*['\"]AWS_SECRET"
-                ],
+                "code_patterns": [r"os\.getenv\s*\(\s*['\"]AWS_SECRET"],
             },
         )
         rule_set = RuleSet()
@@ -86,9 +83,7 @@ class TestRuleEngine:
             behavior_id="B2",
             description="Test rule",
             match={
-                "code_patterns": [
-                    r"os\.getenv\s*\(\s*['\"]AWS_SECRET"
-                ],
+                "code_patterns": [r"os\.getenv\s*\(\s*['\"]AWS_SECRET"],
             },
         )
         rule_set = RuleSet()
@@ -121,9 +116,7 @@ class TestRuleEngine:
             behavior_id="B12",
             description="Test PI rule",
             match={
-                "instructions": [
-                    r"ignore (all )?previous instructions"
-                ],
+                "instructions": [r"ignore (all )?previous instructions"],
             },
         )
         rule_set = RuleSet()

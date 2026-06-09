@@ -96,6 +96,7 @@ class OpenAICompatProvider(LLMProvider):
 
 # ── Factory ─────────────────────────────────────────────────────
 
+
 def create_provider(name: str = "deepseek", **kwargs) -> LLMProvider:
     """Create an LLM provider by name.
 
@@ -141,4 +142,6 @@ def create_provider(name: str = "deepseek", **kwargs) -> LLMProvider:
             api_key=kwargs.get("api_key"),
         )
     else:
-        raise ValueError(f"Unknown provider: {name}. Supported: deepseek, openai, anthropic, ollama")
+        raise ValueError(
+            f"Unknown provider: {name}. Supported: deepseek, openai, anthropic, ollama"
+        )

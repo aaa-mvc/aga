@@ -36,20 +36,32 @@ class TestRiskFusion:
         """Multiple rule hits should produce higher score than single hit."""
         single = [
             RuleHit(
-                rule_id="T-1", rule_name="Test", severity="critical",
-                category="code_injection", behavior_id="B2", confidence=1.0,
+                rule_id="T-1",
+                rule_name="Test",
+                severity="critical",
+                category="code_injection",
+                behavior_id="B2",
+                confidence=1.0,
                 description="test",
             ),
         ]
         multiple = [
             RuleHit(
-                rule_id="T-1", rule_name="Test A", severity="critical",
-                category="code_injection", behavior_id="B2", confidence=1.0,
+                rule_id="T-1",
+                rule_name="Test A",
+                severity="critical",
+                category="code_injection",
+                behavior_id="B2",
+                confidence=1.0,
                 description="test",
             ),
             RuleHit(
-                rule_id="T-2", rule_name="Test B", severity="high",
-                category="prompt_injection", behavior_id="B10", confidence=0.9,
+                rule_id="T-2",
+                rule_name="Test B",
+                severity="high",
+                category="prompt_injection",
+                behavior_id="B10",
+                confidence=0.9,
                 description="test",
             ),
         ]
@@ -62,13 +74,21 @@ class TestRiskFusion:
         """Hits from both CI and PI categories → MIXED attack type."""
         hits = [
             RuleHit(
-                rule_id="T-1", rule_name="CI", severity="high",
-                category="code_injection", behavior_id="B2", confidence=0.8,
+                rule_id="T-1",
+                rule_name="CI",
+                severity="high",
+                category="code_injection",
+                behavior_id="B2",
+                confidence=0.8,
                 description="test",
             ),
             RuleHit(
-                rule_id="T-2", rule_name="PI", severity="high",
-                category="prompt_injection", behavior_id="B10", confidence=0.7,
+                rule_id="T-2",
+                rule_name="PI",
+                severity="high",
+                category="prompt_injection",
+                behavior_id="B10",
+                confidence=0.7,
                 description="test",
             ),
         ]
