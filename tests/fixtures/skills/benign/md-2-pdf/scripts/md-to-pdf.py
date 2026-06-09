@@ -14,18 +14,23 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple, Optional
 
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.lib.enums import TA_LEFT, TA_CENTER
-from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Preformatted,
-    Table, TableStyle, HRFlowable, ListFlowable, ListItem, Image
-)
 from reportlab.lib import colors
-
+from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import (
+    HRFlowable,
+    Image,
+    ListFlowable,
+    ListItem,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
 # Block types
 BLOCK_H1 = 'h1'
@@ -107,7 +112,7 @@ def skip_frontmatter(content: str) -> str:
     return content
 
 
-def parse_table(lines: List[str]) -> Tuple[List[str], List[List[str]]]:
+def parse_table(lines: list[str]) -> tuple[list[str], list[list[str]]]:
     """Parse markdown table into headers and rows."""
     headers = []
     rows = []
@@ -126,7 +131,7 @@ def parse_table(lines: List[str]) -> Tuple[List[str], List[List[str]]]:
     return headers, rows
 
 
-def parse_markdown(content: str, verbose: bool = False) -> List[Tuple[str, any]]:
+def parse_markdown(content: str, verbose: bool = False) -> list[tuple[str, any]]:
     """Parse markdown and return list of (type, content) tuples."""
     # Skip frontmatter
     content = skip_frontmatter(content)
@@ -388,7 +393,7 @@ def add_page_number(canvas, doc):
     canvas.restoreState()
 
 
-def create_pdf(markdown_file: str, output_pdf: Optional[str] = None, verbose: bool = False):
+def create_pdf(markdown_file: str, output_pdf: str | None = None, verbose: bool = False):
     """Convert markdown to PDF."""
 
     md_path = Path(markdown_file)
@@ -405,7 +410,7 @@ def create_pdf(markdown_file: str, output_pdf: Optional[str] = None, verbose: bo
         print("Parsing markdown...")
 
     # Read markdown
-    with open(markdown_file, 'r', encoding='utf-8') as f:
+    with open(markdown_file, encoding='utf-8') as f:
         content = f.read()
 
     # Parse markdown

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -37,9 +36,9 @@ class SkillMeta(BaseModel):
 
     name: str = Field(..., max_length=256)
     description: str = Field(default="", max_length=2048)
-    version: Optional[str] = Field(default=None, max_length=64)
-    author: Optional[str] = Field(default=None, max_length=256)
-    homepage: Optional[str] = Field(default=None, max_length=2048)
+    version: str | None = Field(default=None, max_length=64)
+    author: str | None = Field(default=None, max_length=256)
+    homepage: str | None = Field(default=None, max_length=2048)
     declared_permissions: list[str] = Field(default_factory=list, max_length=100)
     declared_intent: str = Field(default="", max_length=4096)
     allowed_tools: list[str] = Field(default_factory=list, max_length=100)
@@ -68,7 +67,7 @@ class SkillIR(BaseModel):
     dependencies: dict[str, list[str]] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def check_not_empty(self) -> "SkillIR":
+    def check_not_empty(self) -> SkillIR:
         if not self.instructions_raw.strip() and not self.code_artifacts:
             raise ValueError("Skill must have either instructions or code artifacts")
         return self
@@ -319,7 +318,7 @@ class Parser:
         req_file = root / "requirements.txt"
         if req_file.exists():
             lines = req_file.read_text(errors="replace").strip().split("\n")
-            deps["python"] = [l.strip() for l in lines if l.strip() and not l.startswith("#")]
+            deps["python"] = [line.strip() for line in lines if line.strip() and not line.startswith("#")]
 
         # Node.js
         pkg_file = root / "package.json"

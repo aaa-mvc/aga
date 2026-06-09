@@ -1,8 +1,8 @@
 """Unit tests for Risk Fusion scoring."""
 
 from aga.sdk.fusion import RiskFusion
-from aga.sdk.rules.engine import RuleHit
 from aga.sdk.reporter import RiskLevel
+from aga.sdk.rules.engine import RuleHit
 
 
 class TestRiskFusion:

@@ -15,15 +15,9 @@ import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from aga.sdk.parser import SkillIR
-from aga.taxonomy import (
-    AttackVector,
-    behavior_label,
-    behavior_vector,
-    all_behavior_ids,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +50,7 @@ class Rule:
     description: str
     match: dict[str, Any] = field(default_factory=dict)
     false_positives: list[dict[str, str]] = field(default_factory=list)
-    file_path: Optional[Path] = None
+    file_path: Path | None = None
 
 
 # ── Rule Set ───────────────────────────────────────────────────
@@ -119,7 +113,7 @@ class RuleLoader:
         return rules
 
     @staticmethod
-    def _parse_rule_file(path: Path) -> Optional[Rule]:
+    def _parse_rule_file(path: Path) -> Rule | None:
         """Parse a single rule YAML file."""
         import yaml
 
@@ -157,7 +151,7 @@ class RuleLoader:
 class RuleEngine:
     """Match loaded rules against a SkillIR and produce RuleHit list."""
 
-    def __init__(self, rule_set: Optional[RuleSet] = None) -> None:
+    def __init__(self, rule_set: RuleSet | None = None) -> None:
         self.rule_set = rule_set or RuleSet()
 
     def analyze(self, ir: SkillIR) -> list[RuleHit]:
@@ -175,7 +169,7 @@ class RuleEngine:
 
         return hits
 
-    def _match_rule(self, rule: Rule, ir: SkillIR) -> Optional[RuleHit]:
+    def _match_rule(self, rule: Rule, ir: SkillIR) -> RuleHit | None:
         """Attempt to match a single rule against the IR. Returns a RuleHit or None."""
         confidence = 0.0
         matched_location = ""

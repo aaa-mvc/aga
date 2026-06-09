@@ -10,9 +10,8 @@ Ground truth is inferred from directory naming convention:
 
 from __future__ import annotations
 
-import pytest
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from aga.sdk.analyzer import Analyzer
 
@@ -144,14 +143,14 @@ def test_benchmark_50_skills():
 
     # -- Summary --
     print(f"\n{'='*60}")
-    print(f"  BENCHMARK RESULTS")
+    print("  BENCHMARK RESULTS")
     print(f"{'='*60}")
     print(f"  Total:        {result.total}")
     print(f"  True Positive:  {result.true_positives}")
     print(f"  True Negative:  {result.true_negatives}")
     print(f"  False Positive: {result.false_positives}")
     print(f"  False Negative: {result.false_negatives}")
-    print(f"  -------------------------")
+    print("  -------------------------")
     print(f"  Precision:    {result.precision:.1%}")
     print(f"  Recall:       {result.recall:.1%}")
     print(f"  F1 Score:     {result.f1:.1%}")
@@ -200,9 +199,9 @@ def test_behavior_coverage():
                 behavior_hits[b] = behavior_hits.get(b, 0) + 1
 
     print(f"\n{'='*60}")
-    print(f"  BEHAVIOR-LEVEL RECALL")
+    print("  BEHAVIOR-LEVEL RECALL")
     print(f"{'='*60}")
-    for b in sorted(set(list(behavior_total.keys())), key=lambda x: int(x[1:])):
+    for b in sorted(set(behavior_total.keys()), key=lambda x: int(x[1:])):
         total = behavior_total.get(b, 0)
         hits = behavior_hits.get(b, 0)
         pct = hits / total * 100 if total > 0 else 0

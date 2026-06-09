@@ -10,8 +10,8 @@ Core classes for programmatic skill security analysis:
 """
 
 from aga.sdk.analyzer import Analyzer
-from aga.sdk.parser import Parser, SkillIR, SkillMeta, CodeArtifact
-from aga.sdk.reporter import RiskReport, RiskLevel
+from aga.sdk.parser import CodeArtifact, Parser, SkillIR, SkillMeta
+from aga.sdk.reporter import RiskLevel, RiskReport
 
 __all__ = [
     "Analyzer",

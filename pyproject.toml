@@ -79,9 +79,15 @@ include = [
 [tool.ruff]
 target-version = "py310"
 line-length = 100
+exclude = ["tests/fixtures/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+ignore = ["B008", "E501"]  # B008: typer.Argument idiomatic; E501: line length handled by formatter
+
+[tool.ruff.lint.per-file-ignores]
+"tests/fixtures/**" = ["ALL"]
+"scripts/**" = ["ALL"]
 
 [tool.ruff.format]
 quote-style = "double"

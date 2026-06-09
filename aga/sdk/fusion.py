@@ -9,11 +9,8 @@ The fusion algorithm:
 
 from __future__ import annotations
 
-from typing import Optional
-
-from aga.sdk.reporter import RiskLevel, RiskReport, threshold, Issue, AttackType
+from aga.sdk.reporter import AttackType, Issue, RiskReport, threshold
 from aga.sdk.rules.engine import RuleHit
-
 
 # ── Severity weights ───────────────────────────────────────────
 
@@ -36,7 +33,7 @@ class RiskFusion:
     def compute(
         skill_name: str,
         rule_hits: list[RuleHit],
-        semantic_result: Optional[dict] = None,
+        semantic_result: dict | None = None,
         scan_duration_ms: int = 0,
     ) -> RiskReport:
         """Compute final risk score and generate report."""
@@ -101,7 +98,7 @@ class RiskFusion:
 
     @staticmethod
     def _infer_attack_type(
-        rule_hits: list[RuleHit], semantic_result: Optional[dict]
+        rule_hits: list[RuleHit], semantic_result: dict | None
     ) -> AttackType:
         """Determine the dominant attack vector."""
         if semantic_result:
@@ -126,7 +123,7 @@ class RiskFusion:
 
     @staticmethod
     def _generate_suggestions(
-        rule_hits: list[RuleHit], alignment_score: Optional[float]
+        rule_hits: list[RuleHit], alignment_score: float | None
     ) -> list[str]:
         """Generate actionable remediation suggestions."""
         suggestions: list[str] = []

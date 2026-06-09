@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import os
 import logging
-from typing import Optional
+import os
 
 from .base import LLMProvider, LLMResponse
 
@@ -20,7 +19,7 @@ class AnthropicProvider(LLMProvider):
     def __init__(
         self,
         default_model: str = "claude-sonnet-4-6",
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
     ) -> None:
         self.default_model = default_model
         self._api_key = api_key or os.getenv("ANTHROPIC_API_KEY", "")
@@ -31,7 +30,7 @@ class AnthropicProvider(LLMProvider):
         user_prompt: str,
         *,
         temperature: float = 0.0,
-        model: Optional[str] = None,
+        model: str | None = None,
     ) -> LLMResponse:
         """Send a query to Anthropic Claude API."""
         try:
@@ -39,7 +38,7 @@ class AnthropicProvider(LLMProvider):
         except ImportError:
             raise ImportError(
                 "anthropic package required. Install with: pip install aga-sec[deep]"
-            )
+            ) from None
 
         client = Anthropic(api_key=self._api_key)
         model_name = model or self.default_model

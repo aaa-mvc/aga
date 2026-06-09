@@ -1,10 +1,8 @@
 """Unit tests for the Rule Engine."""
 
-import pytest
-from pathlib import Path
 
-from aga.sdk.rules.engine import RuleEngine, RuleSet, RuleLoader, Rule, RuleHit
 from aga.sdk.parser import SkillIR, SkillMeta
+from aga.sdk.rules.engine import Rule, RuleEngine, RuleLoader, RuleSet
 
 
 class TestRuleLoader:

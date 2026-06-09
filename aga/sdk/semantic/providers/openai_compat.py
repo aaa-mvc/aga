@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import os
 import logging
-from typing import Optional
+import os
 
 from .base import LLMProvider, LLMResponse
 
@@ -37,8 +36,8 @@ class OpenAICompatProvider(LLMProvider):
         name: str = "deepseek",
         default_model: str = "deepseek-chat",
         base_url: str = "https://api.deepseek.com/v1",
-        api_key_env: Optional[str] = "DEEPSEEK_API_KEY",
-        api_key: Optional[str] = None,
+        api_key_env: str | None = "DEEPSEEK_API_KEY",
+        api_key: str | None = None,
     ) -> None:
         self.name = name
         self.default_model = default_model
@@ -51,7 +50,7 @@ class OpenAICompatProvider(LLMProvider):
         user_prompt: str,
         *,
         temperature: float = 0.0,
-        model: Optional[str] = None,
+        model: str | None = None,
     ) -> LLMResponse:
         """Send a query to the OpenAI-compatible API."""
         try:
@@ -59,7 +58,7 @@ class OpenAICompatProvider(LLMProvider):
         except ImportError:
             raise ImportError(
                 "openai package required. Install with: pip install aga-sec[deep]"
-            )
+            ) from None
 
         client = OpenAI(api_key=self._api_key, base_url=self.base_url)
         model_name = model or self.default_model
@@ -136,7 +135,7 @@ def create_provider(name: str = "deepseek", **kwargs) -> LLMProvider:
         except ImportError:
             raise ImportError(
                 "anthropic package required. Install with: pip install aga-sec[deep]"
-            )
+            ) from None
         return AnthropicProvider(
             default_model=kwargs.get("model") or "claude-sonnet-4-6",
             api_key=kwargs.get("api_key"),

@@ -11,12 +11,11 @@ from __future__ import annotations
 import logging
 import time
 from pathlib import Path
-from typing import Optional
 
-from aga.sdk.parser import Parser
-from aga.sdk.rules.engine import RuleEngine, RuleSet, RuleLoader
 from aga.sdk.fusion import RiskFusion
+from aga.sdk.parser import Parser
 from aga.sdk.reporter import RiskReport
+from aga.sdk.rules.engine import RuleEngine, RuleLoader, RuleSet
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +34,12 @@ class Analyzer:
 
     def __init__(
         self,
-        rules: Optional[RuleSet] = None,
+        rules: RuleSet | None = None,
         load_builtin: bool = True,
         enable_semantic: bool = False,
         semantic_provider: str = "deepseek",
-        semantic_model: Optional[str] = None,
-        semantic_api_key: Optional[str] = None,
+        semantic_model: str | None = None,
+        semantic_api_key: str | None = None,
     ) -> None:
         """Initialize the Analyzer.
 
@@ -53,7 +52,7 @@ class Analyzer:
             semantic_api_key: API key override.
         """
         self.parser = Parser()
-        self.rule_engine: Optional[RuleEngine] = None
+        self.rule_engine: RuleEngine | None = None
         self.fusion = RiskFusion()
         self.enable_semantic = enable_semantic
         self._semantic_provider = semantic_provider
@@ -157,7 +156,7 @@ class Analyzer:
         for rule in rules:
             self.rule_engine.rule_set.add(rule)
 
-    def _run_semantic(self, ir, rule_hits) -> Optional[dict]:
+    def _run_semantic(self, ir, rule_hits) -> dict | None:
         """Run LLM semantic analysis via configured provider."""
         if self._semantic_engine is None:
             from aga.sdk.semantic.engine import SemanticEngine

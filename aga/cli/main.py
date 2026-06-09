@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 
@@ -95,7 +94,7 @@ def scan(
 # ── Rule commands ──────────────────────────────────────────────
 @rule_app.command("list", help="List all loaded rules")
 def rule_list(
-    search: Optional[str] = typer.Option(None, "--search", "-s", help="Filter by keyword"),
+    search: str | None = typer.Option(None, "--search", "-s", help="Filter by keyword"),
 ) -> None:
     """Display loaded rules, optionally filtered by keyword."""
     typer.echo("📋 Rules (placeholder)")

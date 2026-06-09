@@ -1,10 +1,9 @@
 """Unit tests for the Skill Parser."""
 
-import pytest
-import tempfile
-from pathlib import Path
 
-from aga.sdk.parser import Parser, SkillIR, SkillMeta, CodeArtifact
+import pytest
+
+from aga.sdk.parser import Parser, SkillIR, SkillMeta
 
 
 class TestParser:

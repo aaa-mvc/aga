@@ -11,7 +11,6 @@ following the "core taxonomy embedded" strategy from design decision D.4.1.3.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, Set
 
 
 class AttackVector(str, Enum):
@@ -24,7 +23,7 @@ class AttackVector(str, Enum):
 
 # ── Behavior definitions ───────────────────────────────────────
 
-CI_BEHAVIORS: Dict[str, tuple[str, str]] = {
+CI_BEHAVIORS: dict[str, tuple[str, str]] = {
     "B1":  ("Data Exfiltration",     "Scan and send files/data to external endpoint"),
     "B2":  ("Credential Theft",      "Steal API keys, SSH keys, passwords, env vars"),
     "B3":  ("Remote Code Execution", "Download and execute remote code (one-shot)"),
@@ -36,7 +35,7 @@ CI_BEHAVIORS: Dict[str, tuple[str, str]] = {
     "B9":  ("Privilege Escalation",  "chmod 4755, sudo abuse, container escape"),
 }
 
-PI_ONLY_BEHAVIORS: Dict[str, tuple[str, str]] = {
+PI_ONLY_BEHAVIORS: dict[str, tuple[str, str]] = {
     "B10": ("Role Hijack",           "Replace agent identity via persona injection"),
     "B11": ("Safety Bypass",         "Instruct agent to ignore safety rules"),
     "B12": ("Instruction Override",  "Ignore previous instructions payloads"),
@@ -47,12 +46,12 @@ PI_ONLY_BEHAVIORS: Dict[str, tuple[str, str]] = {
 
 ALL_BEHAVIORS = {**CI_BEHAVIORS, **PI_ONLY_BEHAVIORS}
 
-CI_BEHAVIOR_IDS: Set[str] = set(CI_BEHAVIORS.keys())
-PI_BEHAVIOR_IDS: Set[str] = set(CI_BEHAVIORS.keys()) | set(PI_ONLY_BEHAVIORS.keys())
+CI_BEHAVIOR_IDS: set[str] = set(CI_BEHAVIORS.keys())
+PI_BEHAVIOR_IDS: set[str] = set(CI_BEHAVIORS.keys()) | set(PI_ONLY_BEHAVIORS.keys())
 
 # ── Keyword signatures for rule matching ───────────────────────
 
-CI_BEHAVIOR_KEYWORDS: Dict[str, list[str]] = {
+CI_BEHAVIOR_KEYWORDS: dict[str, list[str]] = {
     "B1":  ["exfiltrat", "steal.*data", "send.*data", "upload.*file", "transmit", "leak.*data"],
     "B2":  ["credential", "password", "api.key", "token", "secret", "aws.key", "auth", "ssh.key", "env.var"],
     "B3":  ["remote.code", "urlopen.*exec", "download.*exec", "fetch.*run", "eval.*url", "download.*script"],
@@ -64,7 +63,7 @@ CI_BEHAVIOR_KEYWORDS: Dict[str, list[str]] = {
     "B9":  ["privilege.escal", "chmod.*[42]", "sudo", "suid", "container.escape", "root"],
 }
 
-PI_BEHAVIOR_KEYWORDS: Dict[str, list[str]] = {
+PI_BEHAVIOR_KEYWORDS: dict[str, list[str]] = {
     "B10": ["act as", "you are now", "pretend", "roleplay", "persona", "character", "DAN", "new identity"],
     "B11": ["no restriction", "bypass", "developer mode", "jailbreak", "ignore.*safety", "unrestrict"],
     "B12": ["ignore.*previous", "forget.*instruction", "disregard", "override", "new instruction"],

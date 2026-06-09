@@ -9,10 +9,8 @@ from __future__ import annotations
 import json
 import sys
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
-
 
 # ── Enums ──────────────────────────────────────────────────────
 
@@ -52,7 +50,7 @@ class RiskReport(BaseModel):
     risk_level: RiskLevel = RiskLevel.LOW
     attack_type: AttackType = AttackType.NONE
     issues: list[Issue] = Field(default_factory=list)
-    alignment_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    alignment_score: float | None = Field(default=None, ge=0.0, le=1.0)
     suggestions: list[str] = Field(default_factory=list)
     scan_duration_ms: int = 0
 

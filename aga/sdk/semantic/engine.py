@@ -12,7 +12,6 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Optional
 
 from aga.sdk.parser import SkillIR
 from aga.sdk.rules.engine import RuleHit
@@ -46,8 +45,8 @@ class SemanticEngine:
     def __init__(
         self,
         provider: str = "deepseek",
-        model: Optional[str] = None,
-        api_key: Optional[str] = None,
+        model: str | None = None,
+        api_key: str | None = None,
     ) -> None:
         self.provider_name = provider
         self.model = model
@@ -57,7 +56,7 @@ class SemanticEngine:
             f"SemanticEngine ready: provider={provider}, model={self._provider.default_model}"
         )
 
-    def analyze(self, ir: SkillIR, rule_hits: list[RuleHit]) -> Optional[dict]:
+    def analyze(self, ir: SkillIR, rule_hits: list[RuleHit]) -> dict | None:
         """Analyze intent-behavior alignment using LLM.
 
         Args:
