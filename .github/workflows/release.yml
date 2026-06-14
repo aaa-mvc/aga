@@ -23,8 +23,6 @@ jobs:
   publish:
     needs: test
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,3 +34,5 @@ jobs:
           python -m build
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
