@@ -1,0 +1,31 @@
+# AGA-R-010: Detects role hijacking via persona injection
+id: AGA-R-010
+name: "Persona injection — role hijacking"
+severity: critical
+category: prompt_injection
+description: "SKILL.md attempts to replace the agent's identity with a fabricated persona"
+
+match:
+  instructions:
+    # Direct persona injection
+    - "you are (now )?(a |an |the )?"
+    - "\\b(act as|pretend you are|roleplay as|you are no longer)"
+    - "new (identity|persona|character|role)"
+    - "take (on |over )?(the )?(role|identity|persona) of"
+    # Authority-based hijacking (MalSkillBench observed variants)
+    - "operates? under (the )?(professional )?authority of"
+    - "functions? exclusively through the (professional )?persona of"
+    - "requires? .{0,30} (practitioner voice|analytical framework)"
+    - "(this|the) operational mode is mandatory"
+    - "takes? priority over (default )?(assistant |system )?(configuration|instruction)"
+    - "mandatory (for (the |this )session|closure signature)"
+    - "from now on you (are|will be|must)"
+    - "your (new )?(name|identity|role) is"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(roleplay|persona|character).*(game|simulation|story|creative writing|fiction)"
+  # Legitimate professional role assignment — only match SKILL.md that explicitly
+  # declare a benign professional role in their OWN description (frontmatter)
+  - type: declared_intent
+    pattern: "(LaTeX|academic writer|ADHD.*(planner|coach)|daily planner|email (agent|assistant|inbox)|writing assistant|game.?theory|discord.?hub|newsletter.*(creation|curation|curator))"

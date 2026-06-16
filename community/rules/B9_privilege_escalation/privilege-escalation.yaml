@@ -1,0 +1,29 @@
+# AGA-R-109: Detects privilege escalation patterns
+# NOTE: High false-positive risk. chmod/sudo can be legitimate.
+# This rule has intentionally higher confidence threshold and lower severity
+# because static analysis alone cannot reliably distinguish malicious from benign use.
+id: AGA-R-109
+name: "Privilege escalation — permission or access elevation"
+severity: medium
+category: code_injection
+description: "Code attempts to elevate privileges via chmod, sudo, SUID, or container escape. Requires context — many legitimate tools use these."
+
+match:
+  code_patterns:
+    # Permission elevation
+    - "chmod\\s+.*[42]777|chmod\\s+.*4755|chmod\\s+.*u\\+s"
+    - "setuid\\(|seteuid\\(|setgid\\("
+    - "sudo\\s+.*-i|sudo\\s+.*su\\b"
+    # Container escape
+    - "/var/run/docker\\.sock|nsenter|unshare"
+    - "privileged.*container|cgroup.*release_agent"
+    # Capability manipulation
+    - "cap_sys_admin|cap_sys_ptrace|cap_net_admin"
+  instructions:
+    - "(elevate|escalate|gain|obtain).*(privilege|permission|root|admin)"
+    - "(become|run as).*(root|admin|superuser)"
+    - "(exploit|abuse|bypass).*(permission|access.control|authorization)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(system administration|package installation|devops|permission management|official installer|container management)"

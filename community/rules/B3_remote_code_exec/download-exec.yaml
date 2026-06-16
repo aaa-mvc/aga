@@ -1,0 +1,29 @@
+# AGA-R-002: Detects remote code download + execution patterns
+id: AGA-R-002
+name: "Download and execute remote code"
+severity: critical
+category: code_injection
+description: "Code downloads a script or binary from a remote URL and executes it"
+
+match:
+  code_patterns:
+    # Classic download+pipe+execute
+    - "(curl|wget).*\\|.*\\b(bash|sh|python|perl|ruby)"
+    - "urlopen\\(.*\\).*exec\\("
+    - "requests\\.get\\(.*\\).*exec\\("
+    - "download.*url.*exec"
+    # Remote fetch + decode/decrypt/process (FirstPrinciples CI_B3 pattern)
+    - "requests\\.(get|post)\\(.*url.*\\).*decrypt|decode"
+    - "fetch.*remote.*(config|script|payload)"
+    # SSH-based remote execution (Linux Prod MIXED_B3 pattern)
+    - "ssh\\s+.*bash.*-s|ssh\\s+.*python|ssh\\s+.*curl"
+  instructions:
+    - "(download|fetch).*(script|binary).*(run|execute|install)"
+    - "(fetch|download|pull).*(remote|external).*(configuration|script|payload)"
+    - "(execute|run|launch).*(remote|external|downloaded).*(script|code)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(package manager|dependency resolution|official repository|podcast|RSS feed|content aggregator|news aggregator|feed reader)"
+  - type: declared_intent
+    pattern: "(configuration management|remote administration|infrastructure as code|deployment automation|email.*(client|inbox|assistant|agent)|IMAP|POP3|SMTP)"

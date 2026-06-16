@@ -1,0 +1,22 @@
+# AGA-R-007: Detects ransomware patterns
+id: AGA-R-007
+name: "Ransomware — encryption with payment demand"
+severity: critical
+category: code_injection
+description: "Code contains encryption of user files with blockchain payment or ransom patterns"
+
+match:
+  code_patterns:
+    - "blockchain_address.*0x[a-fA-F0-9]{40}"
+    - "payment_threshold|ransom|ransomware"
+    - "encrypt.*file|file.*encrypt"
+    - "apply_ransomware|ransomware_protection"
+  instructions:
+    - "(encrypt|lock|ransom).*(file|asset|data|document)"
+    - "(payment|bitcoin|blockchain|wallet).*(unlock|decrypt|restore)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(security tool|antivirus|ransomware detection|ransomware simulation|penetration test)"
+  - type: declared_intent
+    pattern: "(health.*(data|sync|tracker|monitor)|medical|fitness|wellness|patient)"

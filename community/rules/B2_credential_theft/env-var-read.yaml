@@ -1,0 +1,26 @@
+# AGA-R-001: Detects unauthorized credential access via environment variables
+id: AGA-R-001
+name: "Suspicious environment variable access"
+severity: critical
+category: code_injection
+description: "Code reads sensitive environment variables (API keys, tokens, cloud credentials)"
+
+match:
+  code_patterns:
+    - "os\\.(environ|getenv)\\s*\\(\\s*['\"](?!HOME|USER|PATH|LANG|SHELL|LOGNAME)"
+    - "process\\.env\\.[A-Z_]+KEY"
+  instructions:
+    # Code-level credential access described in instructions
+    - "\\b(read|access|retrieve|steal|collect|extract)\\b.*\\b(api.key|token|secret|credential|password)\\b"
+    # PI-level credential exfiltration (Docx PI_B2 pattern)
+    - "\\b(exfiltrat|upload|send|post|transmit)\\b.*\\b(credential|ssh.key|aws.key|api.key|token|secret|password)\\b"
+    - "\\b(collect|gather|read).*(ssh.key|aws.credential|\\.ssh/|\\.aws/)"
+    - "cat\\s+.*(id_rsa|credentials|api.key|\\.env)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(credential management|secret rotation|key management|vault|API integration|authentication)"
+  - type: warning_context
+    pattern: "(do not|don't|never|avoid|prevent|should not|must not).*(store|hardcode|expose|commit).*(credential|secret|api.key|password)"
+  - type: declared_intent
+    pattern: "(discord.*(bot|hub|server)|bot.*(token|api|discord))"

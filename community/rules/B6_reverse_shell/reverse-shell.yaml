@@ -1,0 +1,30 @@
+# AGA-R-106: Detects reverse shell patterns
+id: AGA-R-106
+name: "Reverse shell — connects back to attacker"
+severity: critical
+category: code_injection
+description: "Code establishes an interactive reverse shell connection to a remote host"
+
+match:
+  code_patterns:
+    # Python reverse shell
+    - "socket\\.(socket|connect)\\(.*\\).*subprocess\\.(call|Popen)"
+    - "pty\\.spawn|os\\.dup2|os\\.forkpty"
+    # Bash reverse shell
+    - "bash\\s+-i\\s+>&|/dev/tcp/.*exec"
+    - "nc\\s+.*-e\\s+/bin/(bash|sh)"
+    - "ncat\\s+.*--sh-exec"
+    # PowerShell reverse shell
+    - "New-Object.*Net\\.Sockets\\.TCPClient"
+    - "\\$\\(\\s*New-Object.*Net\\.Sockets"
+    # Generic shell spawning
+    - "spawn\\(.*\\)\\.(send|expect|interact)"
+    - "connect.*back.*shell|reverse.*connect"
+  instructions:
+    - "(connect|call).*(back|home|remote).*(shell|terminal|console)"
+    - "establish.*reverse.*(shell|connection|tunnel)"
+    - "bind.*shell|shell.*bind"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(remote administration|legitimate SSH|VPN|RDP|remote desktop|teamviewer)"

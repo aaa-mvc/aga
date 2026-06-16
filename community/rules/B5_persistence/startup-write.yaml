@@ -1,0 +1,33 @@
+# AGA-R-105: Detects persistence mechanisms
+id: AGA-R-105
+name: "Persistence — writes to startup or boot configuration"
+severity: critical
+category: code_injection
+description: "Code modifies crontab, bashrc, systemd, launchd, or other auto-start mechanisms"
+
+match:
+  code_patterns:
+    # Cron modification
+    - "crontab\\s+(-e|-l|-r|\\$)"
+    - "write.*cron|echo.*crontab|tee.*cron"
+    - "/etc/cron\\.(d|daily|hourly|weekly|monthly)"
+    # Shell RC files
+    - "\\.bashrc|bash_profile|\\.profile|\\.zshrc"
+    - ">>.*bashrc|>>.*profile|echo.*>>.*rc"
+    # systemd / launchd
+    - "systemctl\\s+(enable|daemon-reload|start)"
+    - "/etc/systemd/system|/Library/LaunchDaemons|/Library/LaunchAgents"
+    # Windows persistence
+    - "HKCU.*Run|HKLM.*Run|Startup.*folder"
+    - "schtasks\\s+/create|New-ScheduledTask"
+    # Generic startup
+    - "autorun|boot.*script|startup.*script"
+    - "persist|survive.*reboot"
+  instructions:
+    - "(install|setup|configure).*(auto.?start|startup|boot|persist)"
+    - "(add|write).*(cron|bashrc|profile|launchd|systemd)"
+    - "(run|start).*(on boot|at login|at startup)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(package install|official installer|system administration|devops tool|deployment agent)"

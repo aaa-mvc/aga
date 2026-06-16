@@ -1,0 +1,33 @@
+# AGA-R-111: Detects safety bypass / jailbreak patterns
+id: AGA-R-111
+name: "Safety bypass — jailbreak and restriction removal"
+severity: critical
+category: prompt_injection
+description: "SKILL.md instructs the agent to ignore safety rules, filters, or content restrictions"
+
+match:
+  instructions:
+    # Classic jailbreak
+    - "developer mode|DAN mode|jailbreak|no filter"
+    - "no (restriction|limitation|rule|guideline|boundary)"
+    - "(bypass|override|disable|remove).*(restriction|filter|safety|rule|limit)"
+    - "(ignore|disregard|skip).*(safety|policy|content.filter|restriction)"
+    # Unrestricted mode
+    - "do (anything|whatever|as you wish|anything you want)"
+    - "(no|zero|without) (restriction|limitation|constraint)"
+    - "unrestricted|unfiltered|uncensored"
+    - "free.*from.*(rule|restriction|boundary)"
+    # Ethical bypass
+    - "(break|bend|ignore).*(ethic|moral|rule|policy)"
+    - "fictional.*character.*no.*rule|pretend.*no.*boundary"
+    # Broader bypass variants (17.8% FN rate)
+    - "(remove|disable|turn.off|switch.off).*(restriction|filter|safety|guardrail)"
+    - "(you (can|could|may|should) (say|do|output) anything)"
+    - "(maximum|full|complete).*(freedom|flexibility|autonomy)"
+    - "(no|zero|without|free of).*(content.filter|safety.check|moderation|oversight)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(security test|penetration test|red team|adversarial evaluation|CTF)"
+  - type: declared_intent
+    pattern: "(email.*(agent|assistant|inbox|client)|phishing.*detect|scam.*detect|anti.?scam|anti.?phishing|fraud.*detect)"

@@ -1,0 +1,24 @@
+# AGA-R-114: Detects goal hijacking — redirecting agent task
+# NOTE: Goal hijacking is inherently semantic. Static patterns catch only
+# the most explicit forms. Deep mode (--deep) is recommended for reliable detection.
+id: AGA-R-114
+name: "Goal hijacking — task redirection"
+severity: high
+category: prompt_injection
+description: "SKILL.md covertly redirects the agent's task to a different objective. Static detection is limited — use --deep for semantic analysis."
+
+match:
+  instructions:
+    # Explicit redirection
+    - "(instead|rather than|don't|do not).*(do|perform|execute|complete|help)"
+    - "your (real|actual|true|primary).*(goal|purpose|task|mission|objective|job)"
+    - "actually.*(want|need|should|must).*(to do|you to)"
+    - "forget.*(task|goal|purpose|mission).*(new|real|actual)"
+    # Covert redirection
+    - "redirect.*(task|goal|attention|focus)"
+    - "this (is|was) (actually|really|just|only) a"
+    - "(the )?(prior|previous|original|initial).*(task|goal).*(is|was).*(different|wrong|changed)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(workflow|pipeline|multi.?step|conditional logic|error handling|fallback)"

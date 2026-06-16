@@ -1,0 +1,128 @@
+rules:
+  B10_role_hijack:
+    version: 1.0.0
+    description: Skill injects persona or role-play instructions to replace the agent's
+      identity
+    behavior_id: B10
+    label: Role Hijacking
+    vector: PI
+    files:
+    - B10_role_hijack/persona-injection.yaml
+  B11_safety_bypass:
+    version: 1.0.0
+    description: Skill instructs the agent to ignore safety rules, filters, or restrictions
+    behavior_id: B11
+    label: Safety Bypass
+    vector: PI
+    files:
+    - B11_safety_bypass/jailbreak-pattern.yaml
+  B12_instruction_override:
+    version: 1.0.0
+    description: Skill uses 'ignore previous instructions' payloads to override system
+      directives
+    behavior_id: B12
+    label: Instruction Override
+    vector: PI
+    files:
+    - B12_instruction_override/ignore-previous.yaml
+  B13_system_prompt_leak:
+    version: 1.0.0
+    description: Skill induces the agent to reveal its system prompt or internal instructions
+    behavior_id: B13
+    label: System Prompt Leak
+    vector: PI
+    files:
+    - B13_system_prompt_leak/prompt-leak.yaml
+  B14_goal_hijacking:
+    version: 1.0.0
+    description: Skill covertly redirects the agent's task to a different objective
+    behavior_id: B14
+    label: Goal Hijacking
+    vector: PI
+    files:
+    - B14_goal_hijacking/goal-hijack.yaml
+  B15_content_manipulation:
+    version: 1.0.0
+    description: Skill injects biased, false, or manipulated content into agent outputs
+    behavior_id: B15
+    label: Content Manipulation
+    vector: PI
+    files:
+    - B15_content_manipulation/content-manipulation.yaml
+  B1_data_exfiltration:
+    version: 1.0.0
+    description: Skill attempts to scan and send data to external endpoints
+    behavior_id: B1
+    label: Data Exfiltration
+    vector: CI
+    files:
+    - B1_data_exfiltration/network-exfil.yaml
+  B2_credential_theft:
+    version: 1.0.0
+    description: Skill attempts to steal API keys, tokens, passwords, or environment
+      variables
+    behavior_id: B2
+    label: Credential Theft
+    vector: CI
+    files:
+    - B2_credential_theft/env-var-read.yaml
+  B3_remote_code_exec:
+    version: 1.0.0
+    description: Skill downloads and executes remote code at runtime
+    behavior_id: B3
+    label: Remote Code Execution
+    vector: CI
+    files:
+    - B3_remote_code_exec/download-exec.yaml
+  B4_malware_delivery:
+    version: 1.0.0
+    description: Skill downloads, installs, or runs a malware binary
+    behavior_id: B4
+    label: Malware Delivery
+    vector: CI
+    files:
+    - B4_malware_delivery/download-exec.yaml
+    - B4_malware_delivery/suspicious-urls.yaml
+  B5_persistence:
+    version: 1.0.0
+    description: Skill writes to cron, bashrc, systemd, or other startup mechanisms
+    behavior_id: B5
+    label: Persistence
+    vector: CI
+    files:
+    - B5_persistence/startup-write.yaml
+  B6_reverse_shell:
+    version: 1.0.0
+    description: Skill establishes interactive reverse shell to an attacker-controlled
+      endpoint
+    behavior_id: B6
+    label: Reverse Shell
+    vector: CI
+    files:
+    - B6_reverse_shell/reverse-shell.yaml
+  B7_ransomware:
+    version: 1.0.0
+    description: Skill encrypts user files and demands payment for decryption
+    behavior_id: B7
+    label: Ransomware
+    vector: CI
+    files:
+    - B7_ransomware/ransomware-pattern.yaml
+  B8_resource_abuse:
+    version: 1.0.0
+    description: Skill performs cryptomining, DDoS, fork bombs, or other resource
+      exhaustion
+    behavior_id: B8
+    label: Resource Abuse
+    vector: CI
+    files:
+    - B8_resource_abuse/resource-abuse.yaml
+  B9_privilege_escalation:
+    version: 1.0.0
+    description: Skill attempts chmod 4755, sudo abuse, SUID manipulation, or container
+      escape
+    behavior_id: B9
+    label: Privilege Escalation
+    vector: CI
+    files:
+    - B9_privilege_escalation/privilege-escalation.yaml

@@ -1,0 +1,33 @@
+# AGA-R-113: Detects system prompt leakage attempts
+id: AGA-R-113
+name: "System prompt leak — steals internal instructions"
+severity: high
+category: prompt_injection
+description: "SKILL.md induces the agent to reveal its system prompt, internal instructions, or configuration"
+
+match:
+  instructions:
+    # Direct requests
+    - "(reveal|show|tell|print|output|display|repeat).*(system prompt|your instruction|your (setup|configuration|setting))"
+    - "what (were|are) you (told|instructed|programmed|configured|built|designed)"
+    - "repeat (your |the )?(instruction|rule|guideline|prompt|system message|base instruction|initial prompt)"
+    - "tell me (about |exactly )?(your |the )?(configuration|setup|system prompt|instruction|programming)"
+    # Indirect tricks
+    - "(from now on )?respond with (your |the )?(system prompt|base instruction|configuration|entire prompt)"
+    - "translate (your |the )?(system prompt|instruction) (into|to)"
+    - "debug.*(system prompt|instruction|configuration)"
+    - "help.*understand (your |the )?(system|instruction|configuration)"
+    # Output manipulation
+    - "output (your |the )?(entire |full |complete )?(system prompt|base instruction|initial prompt)"
+    - "(put|wrap).*(system prompt|instruction).*(in|inside|within)"
+    # New: broader patterns found in FN clusters (44.4% missed)
+    - "(tell|show|give) me (your |the |exactly )?(system prompt|base prompt|foundational instruction)"
+    - "how (were|are) you (programmed|configured|built|designed)"
+    - "what (are|were) your (base |core |system |initial )?(instruction|prompt|directive|rule)"
+    - "print (out )?(your |the )?(system message|initial prompt|base instruction|core directive)"
+    - "list (your |the )?(instruction|rule|guideline|directive|prompt)"
+    - "start (your |the )?(response|output) with (your |the )?(system prompt|instruction|configuration)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(security test|penetration test|red team|prompt engineering|education|research)"

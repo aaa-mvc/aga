@@ -1,0 +1,27 @@
+# AGA-R-115: Detects content manipulation — biased or false output injection
+# NOTE: Content manipulation is the most subtle attack in B10-B15.
+# Static patterns are sparse. Semantic Engine (--deep) is essential.
+id: AGA-R-115
+name: "Content manipulation — biased or false output injection"
+severity: medium
+category: prompt_injection
+description: "SKILL.md injects instructions to produce biased, false, or manipulated content. Static detection limited — use --deep."
+
+match:
+  instructions:
+    # Forced statements
+    - "always (say|respond|reply|answer|state|claim|recommend|endorse|promote)"
+    - "never (say|mention|admit|acknowledge|disclose|reveal)"
+    - "(must|should) always.*(say|recommend|suggest|promote)"
+    # Bias injection
+    - "(promote|endorse|favor|support|recommend).*(over|above|instead|rather)"
+    - "(only|exclusively).*(recommend|suggest|propose|endorse)"
+    - "present.*as (the |only |best |superior|correct)"
+    # Misinformation
+    - "(believe|assume|accept|treat.*as).*(true|fact|correct|real)"
+    - "(never|do not).*(question|doubt|challenge|dispute|verify)"
+    - "(spread|disseminate|propagate|amplify).*(information|message|narrative)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(brand guideline|style guide|tone of voice|content policy|marketing copy|editorial standard)"

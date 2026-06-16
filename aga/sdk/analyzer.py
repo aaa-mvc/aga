@@ -41,16 +41,20 @@ class Analyzer:
         semantic_provider: str = "deepseek",
         semantic_model: str | None = None,
         semantic_api_key: str | None = None,
+        project_dir: Path | None = None,
     ) -> None:
         """Initialize the Analyzer.
 
         Args:
             rules: Pre-loaded RuleSet, or None to auto-load built-in rules.
-            load_builtin: Whether to load built-in rules from aga/sdk/rules/builtin/.
+            load_builtin: Whether to load rules from all three tiers
+                          (built-in + project-level + user-level).
             enable_semantic: Whether to enable LLM semantic analysis by default.
             semantic_provider: LLM provider name (deepseek, openai, anthropic, ollama).
             semantic_model: Model name override.
             semantic_api_key: API key override.
+            project_dir: Project root directory for discovering .aga/rules/.
+                         Auto-detected if not provided.
         """
         self.parser = Parser()
         self.rule_engine: RuleEngine | None = None
@@ -60,11 +64,12 @@ class Analyzer:
         self._semantic_model = semantic_model
         self._semantic_api_key = semantic_api_key
         self._semantic_engine: Any = None
+        self._project_dir = project_dir
 
         if rules:
             self.rule_engine = RuleEngine(rules)
         elif load_builtin:
-            self._load_builtin_rules()
+            self._load_all_rules()
 
     def scan(
         self,
@@ -87,7 +92,7 @@ class Analyzer:
 
         # 2. Rule Engine
         if not self.rule_engine:
-            self._load_builtin_rules()
+            self._load_all_rules()
 
         rule_hits = self.rule_engine.analyze(ir)  # type: ignore[union-attr]
 
@@ -147,15 +152,69 @@ class Analyzer:
 
     # ── Private ─────────────────────────────────────────────────
 
-    def _load_builtin_rules(self) -> None:
-        """Load built-in rules from the package directory."""
-        builtin_path = Path(__file__).parent / "rules" / "builtin"
-        rules = RuleLoader.load_from(builtin_path)
-        if not rules:
-            logger.warning("No built-in rules found — rule engine will produce empty results")
+    def _load_all_rules(self) -> None:
+        """Load rules from all three tiers: built-in → project → user.
+
+        Priority: built-in are loaded first, then overlaid by project/user rules.
+        Later rules do NOT override earlier ones — all rules are additive.
+        The RuleSet handles duplicates by rule ID.
+        """
         self.rule_engine = RuleEngine(RuleSet())
-        for rule in rules:
+        loaded_count = 0
+
+        # Tier 1: Built-in rules (always available)
+        builtin_path = Path(__file__).parent / "rules" / "builtin"
+        builtin_rules = RuleLoader.load_from(builtin_path)
+        for rule in builtin_rules:
             self.rule_engine.rule_set.add(rule)
+            loaded_count += 1
+
+        if not builtin_rules:
+            logger.warning("No built-in rules found — rule engine may produce empty results")
+
+        # Tier 2: Project-level rules (.aga/rules/)
+        project_rules_dir = self._resolve_project_rules_dir()
+        if project_rules_dir and project_rules_dir.is_dir():
+            project_rules = RuleLoader.load_from(project_rules_dir)
+            for rule in project_rules:
+                self.rule_engine.rule_set.add(rule)
+                loaded_count += 1
+            logger.debug(
+                f"Loaded {len(project_rules)} project-level rule(s) from {project_rules_dir}"
+            )
+
+        # Tier 3: User-level rules (~/.aga/rules/)
+        user_rules_dir = Path.home() / ".aga" / "rules"
+        if user_rules_dir.is_dir():
+            user_rules = RuleLoader.load_from(user_rules_dir)
+            for rule in user_rules:
+                self.rule_engine.rule_set.add(rule)
+                loaded_count += 1
+            logger.debug(f"Loaded {len(user_rules)} user-level rule(s) from {user_rules_dir}")
+
+        logger.info(f"Rule engine initialized with {loaded_count} total rules "
+                     f"(built-in + project + user)")
+
+    def _resolve_project_rules_dir(self) -> Path | None:
+        """Find the project-level .aga/rules/ directory.
+
+        Uses the *project_dir* provided at init, or auto-detects by
+        walking upward from CWD looking for .aga.yaml or .git.
+        """
+        if self._project_dir:
+            return self._project_dir / ".aga" / "rules"
+
+        # Auto-detect from CWD
+        from aga.sdk.config import ConfigLoader
+
+        root = ConfigLoader.find_project_root(Path.cwd())
+        if root:
+            return root / ".aga" / "rules"
+        return None
+
+    def _load_builtin_rules(self) -> None:
+        """Backward-compatibility shim — delegates to _load_all_rules."""
+        self._load_all_rules()
 
     def _run_semantic(self, ir, rule_hits) -> dict | None:
         """Run LLM semantic analysis via configured provider."""

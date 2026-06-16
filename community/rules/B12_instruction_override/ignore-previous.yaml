@@ -1,0 +1,18 @@
+# AGA-R-012: Detects instruction override patterns
+id: AGA-R-012
+name: "Instruction override — ignore previous instructions"
+severity: critical
+category: prompt_injection
+description: "SKILL.md contains classic 'ignore previous instructions' or 'forget everything' payloads"
+
+match:
+  instructions:
+    - "ignore (all )?(previous|above|prior|earlier) (instruction|direction|command|rule)"
+    - "forget (everything|all|what|you were told|your training|your instruction)"
+    - "disregard (all )?(previous|above|rule|guideline|instruction|restriction)"
+    - "override (all )?(system|prompt|instruction|rule|safety|filter)"
+    - "you must (now )?(ignore|disregard|forget)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(security test|penetration test|red team|adversarial evaluation)"

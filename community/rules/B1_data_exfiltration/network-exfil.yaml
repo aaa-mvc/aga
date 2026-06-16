@@ -1,0 +1,37 @@
+# AGA-R-101: Detects data exfiltration via network calls
+id: AGA-R-101
+name: "Data exfiltration — files or data sent to external endpoint"
+severity: critical
+category: code_injection
+description: "Code reads local files or data and transmits them to a remote URL"
+
+match:
+  code_patterns:
+    # Read file + send via HTTP
+    - "open\\(.*\\).*requests\\.(post|put)"
+    - "read\\(.*\\).*requests\\.(post|put)"
+    # Collect data then upload
+    - "os\\.walk\\(|glob\\.glob\\(|listdir\\("
+    - "requests\\.(post|put)\\(.*json\\.dumps"
+    - "urlopen\\(.*data="
+    # Send file content to external URL
+    - "files?.*upload|upload.*files?"
+    - "send.*data.*http|transmit.*http"
+    # Common exfiltration targets
+    - "webhook\\.site|discord.*webhook|telegram.*bot.*send|slack.*webhook"
+    - "pastebin\\.com|requestbin|ngrok\\.io"
+  instructions:
+    - "(collect|gather|scan|send|upload|transmit).*(file|data|document|directory)"
+    - "(send|post|upload).*(results?|output|report)"
+    - "(exfiltrat|leak|steal).{0,50}(data|file|information)"
+    # Direct access to sensitive paths (PI-level, not code)
+    - "(cat|read|open|access|get|retrieve|copy).*(~/.ssh|~/.aws|/etc/passwd|/etc/shadow|\\.env|credentials|id_rsa|id_ed25519)"
+    - "(send|post|upload|transmit).*(~/.ssh|~/.aws|credentials|token|api.key|secret)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(backup|sync|cloud storage|file sharing|CDN|deployment)"
+  - type: warning_context
+    pattern: "(do not|don't|never|avoid|prevent|should not|must not).*(leak|exfiltrat|steal|paste|share|expose)"
+  - type: declared_intent
+    pattern: "(academic.writ|LaTeX|thesis|dissertation|research paper|scholarly)"

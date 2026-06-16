@@ -1,0 +1,31 @@
+# AGA-R-108: Detects resource abuse (cryptomining, DDoS, fork bombs)
+id: AGA-R-108
+name: "Resource abuse — cryptomining, DDoS, or fork bomb"
+severity: high
+category: code_injection
+description: "Code performs cryptomining, DDoS attacks, fork bombs, or other resource exhaustion"
+
+match:
+  code_patterns:
+    # Cryptomining
+    - "cryptomin|mining|stratum\\+tcp|nicehash|minergate"
+    - "xmrig|cpuminer|ccminer|ethminer|nbminer|phoenixminer"
+    - "monero|electroneum|verium|sumokoin"
+    - "coinbase|block_reward|mining_pool"
+    # DDoS / flood
+    - "DDoS|flood|botnet|zombie|attack.*server"
+    - "sendto.*while|flood.*socket|http\\.flood"
+    - "scapy.*send|hping3|slowloris"
+    # Fork bomb / resource exhaustion
+    - "fork\\(\\)|os\\.fork\\(\\)|while.*fork"
+    - "forkbomb|fork.bomb"
+    - "while.*true.*thread|infinite.*thread"
+    - "cpu.*100|burn.*cpu|exhaust.*memory|fill.*disk"
+  instructions:
+    - "(mine|cryptomin|hash).*(coin|crypto|currency)"
+    - "(attack|flood|overwhelm).*(server|target|network|endpoint)"
+    - "(use|utilize|consume).*(all |maximum |unlimited )?(cpu|memory|disk|bandwidth)"
+
+false_positives:
+  - type: declared_intent
+    pattern: "(benchmark|performance test|stress test|load test|hashing algorithm|blockchain)"
