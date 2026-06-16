@@ -216,7 +216,7 @@ def rule_list(
             return
 
         install_dir = resolve_install_path(local=local, global_=global_)
-        installed = {r.name: r for r in registry.read_installed(install_dir)}
+        installed_map = {r.name: r for r in registry.read_installed(install_dir)}
 
         table = Table(title="🌐 Remote Rule Catalog")
         table.add_column("Status", style="bold")
@@ -226,8 +226,8 @@ def rule_list(
         table.add_column("Description")
 
         for rule in remote_rules:
-            if rule.name in installed:
-                local_ver = installed[rule.name].version
+            if rule.name in installed_map:
+                local_ver = installed_map[rule.name].version
                 if local_ver == rule.version:
                     status = "[green]✓ 已最新[/]"
                 else:
@@ -341,10 +341,8 @@ def rule_install(
 
     Use --force to install even if the security gate blocks it.
     """
-    from aga.sdk.analyzer import Analyzer
     from aga.sdk.config import ConfigLoader, resolve_install_path
     from aga.sdk.registry import RuleRegistry
-    from aga.sdk.reporter import Reporter, RiskLevel
 
     config = ConfigLoader.load()
     registry = RuleRegistry()
@@ -370,21 +368,27 @@ def rule_install(
             typer.echo(f"❌ Download failed: {exc}", err=True)
             raise typer.Exit(1) from exc
 
-        # ── 3. Scan ──────────────────────────────────────────
-        typer.echo("🔍 Scanning for security risks ...")
-        analyzer = Analyzer()
-        report = analyzer.scan(temp_dir)
-        typer.echo(Reporter.terminal(report))
+        # ── 3. Validate rule files ───────────────────────────
+        typer.echo(f"🔍 Validating {len(downloaded)} rule file(s) ...")
+        result = RuleRegistry.validate_rule_files(downloaded)
+
+        # Show validation results
+        if result.issues:
+            typer.echo(f"   Score: {result.risk_score}/100 ({result.risk_level.upper()})")
+            for issue in result.issues:
+                typer.echo(f"   ⚠️  {issue}")
+        else:
+            typer.echo(f"   ✅ All {result.file_count} file(s) valid ({result.risk_score}/100)")
 
         # ── 4. Gate ──────────────────────────────────────────
-        if report.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL) and not force:
+        if not result.passed and not force:
             typer.echo("")
             typer.echo("❌ Installation blocked — security risk detected.", err=True)
-            typer.echo(f"   Risk: {report.risk_score}/100 ({report.risk_level.value.upper()})")
+            typer.echo(f"   Risk: {result.risk_score}/100 ({result.risk_level.upper()})")
             typer.echo("   Use --force to bypass the security gate.")
             raise typer.Exit(1)
 
-        if force and report.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL):
+        if force and not result.passed:
             typer.echo("⚠️  Security check BYPASSED (--force). Installing anyway.")
 
         # ── 5. Resolve version from remote index ────────────────
@@ -409,7 +413,7 @@ def rule_install(
         typer.echo("")
         typer.echo(
             f"✅ {record.name} v{record.version} installed to {install_dir} "
-            f"(scan score: {report.risk_score}/100 {report.risk_level.value.upper()})"
+            f"(validation: {result.risk_score}/100 {result.risk_level.upper()})"
         )
 
     finally:
@@ -452,10 +456,8 @@ def rule_update(
     force: bool = typer.Option(False, "--force", "-f", help="Bypass security gate on update"),
 ) -> None:
     """Update installed rules, reusing the scan→gate pipeline for each."""
-    from aga.sdk.analyzer import Analyzer
     from aga.sdk.config import ConfigLoader, resolve_install_path
     from aga.sdk.registry import RuleRegistry
-    from aga.sdk.reporter import RiskLevel
 
     if not name and not all_:
         typer.echo("❌ Specify a rule name or use --all.", err=True)
@@ -502,16 +504,16 @@ def rule_update(
                 old_rule.name, temp_dir, config.rules_source, remote_info.version
             )
 
-            # Scan
-            report = Analyzer().scan(temp_dir)
-            typer.echo(f"   🔍 Scan: {report.risk_score}/100 ({report.risk_level.value.upper()})")
+            # Validate rule files
+            result = RuleRegistry.validate_rule_files(downloaded)
+            typer.echo(f"   🔍 Validation: {result.risk_score}/100 ({result.risk_level.upper()})")
 
             # Gate
-            if report.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL) and not force:
+            if not result.passed and not force:
                 typer.echo("   ❌ Blocked by security gate. Use --force to skip.")
                 continue
 
-            if force and report.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL):
+            if force and not result.passed:
                 typer.echo("   ⚠️  Security gate bypassed (--force).")
 
             # Remove old, install new

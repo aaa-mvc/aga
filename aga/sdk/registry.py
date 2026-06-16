@@ -11,15 +11,52 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import shutil
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import httpx
+import yaml as _yaml
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
+
+# ── Rule validation result ─────────────────────────────────────
+
+
+@dataclass
+class RuleValidationResult:
+    """Result of scanning downloaded rule files for safety."""
+
+    passed: bool
+    risk_score: int  # 0-100
+    risk_level: str  # low | medium | high | critical
+    issues: list[str] = field(default_factory=list)
+    file_count: int = 0
+
+# ── Suspicious patterns for rule YAML files ────────────────────
+
+# Patterns that should NEVER appear in a legitimate rule YAML
+_SUSPICIOUS_PATTERNS: list[tuple[str, str, str]] = [
+    # (regex, severity, description)
+    (r'(?:os\.system|subprocess\.(?:call|run|Popen)|exec\s*\(|eval\s*\()',
+     "critical", "Code execution pattern in rule file"),
+    (r'(?:rm\s+-rf\s+/|del\s+/[fs]|format\s+[cdefgh]:)',
+     "critical", "Destructive filesystem pattern in rule file"),
+    (r'(?:(?:curl|wget)\s+(?!https://github\.com/aaa-mvc)[^|&;]*\|?\s*(?:sh|bash|python))',
+     "critical", "Remote shell piping in rule file"),
+    (r'(?:-----BEGIN\s+(?:RSA|EC|DSA|OPENSSH)\s+PRIVATE\s+KEY-----)',
+     "critical", "Embedded private key in rule file"),
+    (r'__import__\s*\(', "high", "Dynamic import in rule file"),
+    (r'base64\.(?:b64decode|decodestring)\s*\(', "high", "Obfuscated payload pattern in rule file"),
+]
+
+# Required top-level keys in a valid rule YAML
+_REQUIRED_RULE_KEYS = {"id", "name", "severity", "category"}
+_VALID_SEVERITIES = {"critical", "high", "medium", "low"}
 
 # ── Models ───────────────────────────────────────────────────────
 
@@ -366,3 +403,101 @@ class RuleRegistry:
 
         self.add_installed(install_dir, record)
         return record
+
+    # ── Rule file validation ────────────────────────────────────
+
+    @classmethod
+    def validate_rule_files(cls, files: list[Path]) -> RuleValidationResult:
+        """Validate downloaded rule YAML files for safety and correctness.
+
+        Checks:
+          1. YAML is well-formed and safe-parseable
+          2. Required rule keys are present (id, name, severity, category)
+          3. No suspicious code injection patterns embedded in the YAML
+
+        This is a lightweight static check — NOT the full Analyzer pipeline.
+        Rule YAML files loaded by ``yaml.safe_load`` cannot execute code,
+        but we still verify they contain no embedded payloads.
+
+        Args:
+            files: Paths to downloaded rule YAML files.
+
+        Returns:
+            RuleValidationResult with passed/failed, risk_score, and issues.
+        """
+        issues: list[str] = []
+        file_count = 0
+        max_risk = 0
+        max_level = "low"
+
+        for file_path in files:
+            if file_path.suffix.lower() not in (".yaml", ".yml"):
+                continue
+            file_count += 1
+
+            # 1. Parse YAML safely
+            try:
+                raw = file_path.read_text(encoding="utf-8", errors="replace")
+                data = _yaml.safe_load(raw)
+            except _yaml.YAMLError as exc:
+                issues.append(f"{file_path.name}: invalid YAML — {exc}")
+                max_risk = max(max_risk, 80)
+                max_level = "high"
+                continue
+            except Exception as exc:
+                issues.append(f"{file_path.name}: cannot read file — {exc}")
+                max_risk = max(max_risk, 80)
+                max_level = "high"
+                continue
+
+            if not isinstance(data, dict):
+                issues.append(f"{file_path.name}: not a rule mapping")
+                max_risk = max(max_risk, 50)
+                max_level = "medium"
+                continue
+
+            # 2. Check required keys
+            missing = _REQUIRED_RULE_KEYS - set(data.keys())
+            if missing:
+                issues.append(f"{file_path.name}: missing keys: {', '.join(sorted(missing))}")
+                max_risk = max(max_risk, 40)
+                max_level = "medium"
+
+            # 3. Validate severity value
+            severity = str(data.get("severity", "")).lower()
+            if severity and severity not in _VALID_SEVERITIES:
+                issues.append(f"{file_path.name}: invalid severity '{severity}'")
+                max_risk = max(max_risk, 30)
+                if max_level == "low":
+                    max_level = "medium"
+
+            # 4. Scan for suspicious patterns
+            for pattern, sev, desc in _SUSPICIOUS_PATTERNS:
+                if re.search(pattern, raw, re.IGNORECASE):
+                    issues.append(f"{file_path.name}: {desc}")
+                    if sev == "critical":
+                        max_risk = max(max_risk, 90)
+                        max_level = "critical"
+                    elif sev == "high":
+                        max_risk = max(max_risk, 70)
+                        if max_level not in ("critical",):
+                            max_level = "high"
+
+        # Determine final level from score
+        if max_risk > 0:
+            if max_risk >= 80:
+                max_level = "critical"
+            elif max_risk >= 55:
+                max_level = "high"
+            elif max_risk >= 30:
+                max_level = "medium"
+
+        passed = max_level not in ("high", "critical")
+
+        return RuleValidationResult(
+            passed=passed,
+            risk_score=max_risk,
+            risk_level=max_level,
+            issues=issues,
+            file_count=file_count,
+        )
